@@ -1,0 +1,5 @@
+R.txt
+word.txt
+dgim.txt
+flajolet.txt
+cure.txt
