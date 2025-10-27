@@ -1,0 +1,34 @@
+def noOfOnes(x):
+    return x.count("1")
+
+data = input("Enter Input Stream: ").strip()
+window_size = int(input("Enter Window Size: "))
+
+if len(data) > window_size:
+    data = data[-window_size:]
+
+result = []
+power = 0
+
+i = 0
+while i < len(data):
+    # Skip leading zeros (DGIM ignores 0s)
+    while i < len(data) and data[i] == "0":
+        i += 1
+    if i >= len(data):
+        break
+
+    string = ""
+    count = 0
+    start = i
+    while i < len(data) and count < 2 ** power:
+        string += data[i]
+        if data[i] == "1":
+            count += 1
+        i += 1
+
+    result.append(string)
+    power += 1
+
+print("Buckets:", result)
+print("Total number of 1s:", sum(noOfOnes(bucket) for bucket in result))

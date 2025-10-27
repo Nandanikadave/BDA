@@ -1,0 +1,88 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# --- Function Definitions ---
+
+def pick_representatives(points, c, alpha):
+    centroid = np.mean(points, axis=0)
+    
+    # Pick min(c, len(points)) representatives to avoid sampling errors
+    num_reps = min(len(points), c)
+    reps = points[np.random.choice(len(points), num_reps, replace=False)] 
+    
+    # Shrink the representatives toward the centroid
+    reps = centroid + alpha * (reps - centroid)
+    
+    return reps
+
+
+def get_cluster_distance(c1, c2):
+    dists = np.linalg.norm(c1['reps'][:, None] - c2['reps'], axis=2)
+    return np.min(dists)
+
+def merge_clusters(c1, c2, c, alpha):
+    merged_points = np.vstack([c1['points'], c2['points']])
+    merged_reps = pick_representatives(merged_points, c, alpha)
+    return {'points': merged_points, 'reps': merged_reps}
+
+def cure(data, k, c, alpha):
+    clusters = [{'points': data[i:i+1], 'reps': data[i:i+1]} for i in range(len(data))]
+
+    while len(clusters) > k:
+        min_dist = float('inf')
+        i_to_merge, j_to_merge = -1, -1
+
+        for i in range(len(clusters)):
+            for j in range(i + 1, len(clusters)):
+                d = get_cluster_distance(clusters[i], clusters[j])
+                if d < min_dist:
+                    min_dist = d
+                    i_to_merge, j_to_merge = i, j
+
+        new_cluster = merge_clusters(clusters[i_to_merge], clusters[j_to_merge], c, alpha)
+
+        # Remove old clusters and add the new merged one
+        clusters.pop(j_to_merge)
+        clusters.pop(i_to_merge)
+        clusters.append(new_cluster)
+
+    return clusters
+
+
+# --- Main Execution and Plotting ---
+
+if __name__ == "__main__":
+    # Temporary sample data (no CSV needed)
+    data = np.array([
+        [1, 1], [2, 1], [1, 2],     # Cluster 1 (bottom-left)
+        [8, 8], [9, 8], [8, 9],     # Cluster 2 (middle)
+        [50, 50], [51, 50], [50, 51]  # Cluster 3 (top-right)
+    ])
+
+    print("Data points:\n", data)
+
+    k = 3       # Number of clusters
+    c = 3       # Number of representatives per cluster
+    alpha = 0.4 # Shrinkage factor
+    colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
+
+    clusters = cure(data, k=k, c=c, alpha=alpha)
+
+    print("\n--- Final Clusters ---")
+    for idx, cluster in enumerate(clusters):
+        print(f"Cluster {idx+1}:")
+        print("Points:\n", cluster['points'])
+        print("Representatives:\n", cluster['reps'])
+        print()
+
+    # Plotting
+    for idx, cluster in enumerate(clusters):
+        pts = cluster['points']
+        reps = cluster['reps']
+        plt.scatter(pts[:, 0], pts[:, 1], color=colors[idx % len(colors)], alpha=0.6)
+        plt.scatter(reps[:, 0], reps[:, 1], color='k', marker='x', s=80)
+
+    plt.title(f"CURE Clustering (k={k}, c={c}, alpha={alpha})")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.show()

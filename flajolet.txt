@@ -1,0 +1,23 @@
+def flajolet_martin_multi(data, num_hashes=8):
+    phi = 0.77351
+    estimates = []
+
+    for seed in range(num_hashes):
+        max_zero_run = 0
+        for item in data:
+            # Slightly different hash each time
+            h = hashlib.sha256(f"{item}-{seed}".encode()).hexdigest()
+            hash_value = int(h, 16)
+            zeros = 0
+            while hash_value > 0 and (hash_value & 1) == 0:
+                zeros += 1
+                hash_value >>= 1
+            max_zero_run = max(max_zero_run, zeros)
+        estimates.append((2 ** max_zero_run) / phi)
+
+    return sum(estimates) / len(estimates)
+
+
+# Example usage
+data = ["apple", "banana", "orange", "banana", "apple", "grape"]
+print("Estimated distinct elements:", flajolet_martin_multi(data))
