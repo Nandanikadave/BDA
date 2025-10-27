@@ -37,3 +37,7 @@ hist(mtcars$mpg,
 dev.off()
 
 print("✅ Plots saved: barplot.png, scatterplot.png, histogram.png")
+
+
+#run
+Rscript file.R
