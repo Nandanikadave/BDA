@@ -3,3 +3,4 @@ word.txt
 dgim.txt
 flajolet.txt
 cure.txt
+https://raw.githubusercontent.com/Nandanikadave/BDA/refs/heads/main/R.txt
